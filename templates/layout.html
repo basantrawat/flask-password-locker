@@ -3,56 +3,182 @@
 
 <head>
   {% block head %}
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/dist/css/bootstrap.min.css') }}" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
   <link rel="shortcut icon" href="{{url_for('static', filename= 'images/favicon.ico')}}" type="image/x-icon">
-  <title>Password Manager - {% block title %}{% endblock %}</title>
+  <title>Password Locker - {% block title %}{% endblock %}</title>
   {% endblock %}
 </head>
 
-<body>
+<body class="bg-gray-100 text-gray-800 font-sans">
   {% block navigation %}
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-      {% if not session %}
-      <a class="navbar-brand" href="http://127.0.0.1:5000/" style="width:100vw; text-align:center">
-        <img src="{{ url_for('static', filename='images/logo-sm.png') }}" alt="logo" width="60">
-        <b>&nbsp;&nbsp;&nbsp; Password Manager</b>
-      </a>
-      {% endif %}
-      {% if session %}
-      <a class="navbar-brand" href="http://127.0.0.1:5000/">
-        <img src="{{ url_for('static', filename='images/logo-sm.png') }}" alt="logo" width="60"> <b>Password Manager</b>
-      </a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample07"
-        aria-controls="navbarsExample07" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="navbarsExample07">
-        <ul class="navbar-nav mr-auto ml-5">
-          <li class="nav-item">
-            <a class="nav-link text-light font-weight-bold" href="{{ url_for('add_details') }}">Add Account Details</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link text-light font-weight-bold" href="{{ url_for('get_details') }}">Get Account Details</a>
-          </li>
-        </ul>
-        <span class="navbar-text font-weight-bold">{{session['username']}} <a
-            href="{{url_for('logout')}}">(Logout)</a></span>
+  <nav class="bg-gray-800 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4">
+      <div class="flex justify-between h-16">
+        <div class="flex items-center">
+          <a class="flex items-center text-white" href="{{ url_for('index') }}">
+            <img src="{{ url_for('static', filename='images/logo-sm.png') }}" alt="logo" width="40" height="40"
+              class="mr-2">
+            <span class="font-bold text-xl">Password Locker</span>
+          </a>
+          <div class="hidden md:flex items-baseline ml-10 space-x-4">
+            {% if session['username'] %}
+            <a href="{{ url_for('add_details') }}"
+              class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Add
+              Credential</a>
+            <a href="{{ url_for('get_details') }}"
+              class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">View
+              Credentials</a>
+            {% endif %}
+          </div>
+        </div>
+        <div class="hidden md:flex items-center space-x-4">
+          {% if session['username'] %}
+          <div class="relative">
+            <button id="user-menu-button"
+              class="flex items-center text-gray-300 hover:text-white focus:outline-none">
+              <i class="fas fa-user mr-2"></i>
+              <span>{{session['username']}}</span>
+              <i class="fas fa-caret-down ml-2"></i>
+            </button>
+            <div id="user-menu"
+              class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 hidden">
+              <a href="{{url_for('profile')}}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+              <a href="{{url_for('logout')}}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
+            </div>
+          </div>
+          {% else %}
+          <a href="{{ url_for('login') }}"
+            class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Login</a>
+          <a href="{{ url_for('register') }}"
+            class="bg-indigo-600 text-white hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium">Register</a>
+          {% endif %}
+        </div>
+        <div class="md:hidden flex items-center">
+          <button id="mobile-menu-button" class="text-gray-300 hover:text-white focus:outline-none">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="md:hidden hidden">
+      <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+        {% if session['username'] %}
+        <a href="{{ url_for('add_details') }}"
+          class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Add
+          Credential</a>
+        <a href="{{ url_for('get_details') }}"
+          class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">View
+          Credentials</a>
+        <div class="border-t border-gray-700 my-2"></div>
+        <div class="px-3 py-2">
+            <span class="text-gray-300 font-medium flex items-center"><i class="fas fa-user mr-2"></i>{{session['username']}}</span>
+        </div>
+        <a href="{{url_for('logout')}}"
+          class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Logout</a>
+        {% else %}
+        <a href="{{ url_for('login') }}"
+          class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Login</a>
+        <a href="{{ url_for('register') }}"
+          class="bg-indigo-600 text-white hover:bg-indigo-500 block px-3 py-2 rounded-md text-base font-medium">Register</a>
         {% endif %}
       </div>
     </div>
   </nav>
   {% endblock %}
 
-  {% block main_content %}{% endblock %}
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div id="flash-messages" class="space-y-2">
+      {% for category, message in messages %}
+      {% set bg_color = 'bg-blue-100 border-blue-500 text-blue-700' %}
+      {% if category == 'success' %}{% set bg_color = 'bg-green-100 border-green-500 text-green-700' %}{% endif %}
+      {% if category == 'danger' %}{% set bg_color = 'bg-red-100 border-red-500 text-red-700' %}{% endif %}
+      {% if category == 'warning' %}{% set bg_color = 'bg-yellow-100 border-yellow-500 text-yellow-700' %}{% endif %}
+      <div class="flash-message border-l-4 p-4 {{ bg_color }}" role="alert">
+        <div class="flex">
+          <div class="py-1"><i class="fas fa-info-circle mr-3"></i></div>
+          <div class="flex-grow">
+            <p class="font-bold">{{ category.title() }}</p>
+            <p class="text-sm">{{ message }}</p>
+          </div>
+          <button type="button" class="ml-4 close-flash">&times;</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+    {% block main_content %}{% endblock %}
+  </main>
 
   {% block footer %}
-  <script src="{{ url_for('static', filename='vendor/jquery.min.js') }}"></script>
-  <script src="{{ url_for('static', filename='vendor/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+  <footer class="bg-white shadow-inner mt-auto py-4">
+    <div class="max-w-7xl mx-auto px-4 text-center">
+      <span class="text-gray-500">All Copyright Reserved to &copy; <a
+          href="https://linkedin.com/in/basantsinghrawat/" class="text-indigo-600 hover:underline">Basant S.
+          Rawat</a></span>
+    </div>
+  </footer>
   {% endblock %}
+  
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  
+  <!-- zxcvbn library for password strength -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js" integrity="sha512-ThM/xPinterk7quBCt+bE/h/u1bcSud/imgKyeu/z68+KzV3p/95JmK9iKv5qZk2p/Cbn3+u/sr5p1/pY3w/A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+    $(document).ready(function() {
+        // Navbar toggles
+        $('#mobile-menu-button').click(function() {
+            $('#mobile-menu').toggleClass('hidden');
+        });
+
+        $('#user-menu-button').click(function() {
+            $('#user-menu').toggleClass('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        $(document).click(function(event) {
+            if (!$(event.target).closest('#user-menu-button, #user-menu').length) {
+                $('#user-menu').addClass('hidden');
+            }
+        });
+
+        // Flash message dismiss
+        $('.close-flash').click(function() {
+            $(this).closest('.flash-message').fadeOut('fast');
+        });
+
+        // --- START: Auto Logout --- //
+        {% if session['username'] %}
+        let inactivityTimer;
+        const logoutUser = () => {
+            window.location.href = "{{ url_for('logout') }}";
+        };
+        const resetTimer = () => {
+            clearTimeout(inactivityTimer);
+            inactivityTimer = setTimeout(logoutUser, 15 * 60 * 1000); // 15 minutes
+        };
+        $(document).on('mousemove keypress click', resetTimer);
+        resetTimer(); // Initial setup
+        {% endif %}
+        // --- END: Auto Logout --- //
+    });
+  </script>
+
   {% block custom_script %} {% endblock %}
 </body>
 

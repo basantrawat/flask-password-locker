@@ -1,55 +1,85 @@
 {% extends 'layout.html'%}
-{% block title %}Register/Login{% endblock %}
-{% block head %}
-    {{ super() }}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
-    <style>
-        body{
-            background: '#ada996';
-            background: linear-gradient(to right, #ada996, #f2f2f2, #dbdbdb, #eaeaea);
-        }
-    </style>
-{% endblock %}
+{% block title %}Register{% endblock %}
 
 {% block navigation %}{% endblock %}
-{% block main_content %}
-<body class="text-center">
-    
-    <form class="form-signin" action="{{url_for('register')}}" method="POST">
-        <a href="{{url_for('index')}}"><img class="mb-4" src="{{ url_for('static', filename='images/logo.png') }}" alt="" width="100" style="filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));"></a>
-        <h1 class="h3 mb-3 font-weight-normal">Register/Sign Up</h1>
-        {% if message %}
-            <div class="alert alert-danger" role="alert">
-                {{message}}
-            </div>
-        {% endif %}
-        <label for="inputEmail" class="sr-only">Email address</label>
-        <input type="email" id="inputEmail" name="email" class="form-control" placeholder="Email address" required autofocus>
-        
-        <label for="inputPassword" class="sr-only">Password</label>
-        <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
-        
-        <label for="inputRePassword" class="sr-only">Re-Password</label>
-        <input type="password" id="inputRePassword" name="repassword" class="form-control" placeholder="Re-Password" required>
+{% block footer %}{% endblock %}
 
-        <button class="btn btn-lg btn-primary btn-block" type="submit" disabled>Sign Up</button><br>
-        <span>Sign In if already registerd? <a href="{{url_for('login')}}">Sign In</a></span>
-        <p class="mt-5 mb-3 text-muted">&copy; 2021-2022</p>
-    </form>
-</body>
+{% block main_content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div>
+            <a href="{{url_for('index')}}">
+                <img class="mx-auto h-24 w-auto" src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" style="filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.3));">
+            </a>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Create a new account
+            </h2>
+        </div>
+        <form class="mt-8 space-y-6" action="{{url_for('register')}}" method="POST">
+            <div class="rounded-md shadow-sm -space-y-px">
+                <div>
+                    <label for="inputEmail" class="sr-only">Email address</label>
+                    <input id="inputEmail" name="email" type="email" autocomplete="email" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Email address">
+                </div>
+                <div>
+                    <label for="inputPassword" class="sr-only">Password</label>
+                    <input id="inputPassword" name="password" type="password" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Password">
+                </div>
+                <div>
+                    <label for="inputRePassword" class="sr-only">Re-enter Password</label>
+                    <input id="inputRePassword" name="repassword" type="password" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Re-enter Password">
+                </div>
+            </div>
+            <div id="passwordHelp" class="text-sm text-center"></div>
+
+            <div>
+                <button id="submitBtn" type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-400 disabled:cursor-not-allowed" disabled>
+                    Sign Up
+                </button>
+            </div>
+        </form>
+        <div class="text-sm text-center">
+            <p class="text-gray-600">Already registered? 
+                <a href="{{url_for('login')}}" class="font-medium text-indigo-600 hover:text-indigo-500">
+                    Sign In
+                </a>
+            </p>
+        </div>
+        <p class="mt-8 text-center text-sm text-gray-500">
+            &copy; 2021-2022
+        </p>
+    </div>
+</div>
 {% endblock%}
 
 {% block custom_script %}
 <script>
-    $("#inputRePassword").focusout(function(){
-        if($("#inputPassword").val()==$("#inputRePassword").val()){
-            $("button").removeAttr("disabled");
-            $("#inputRePassword").css({'box-shadow': '0 0 0 0.2rem rgb(0 128 0 / 40%)'});
+    $(document).ready(function() {
+        const password = $('#inputPassword');
+        const rePassword = $('#inputRePassword');
+        const helpText = $('#passwordHelp');
+        const submitBtn = $('#submitBtn');
+
+        function validatePasswords() {
+            const passVal = password.val();
+            const rePassVal = rePassword.val();
+
+            if (passVal.length > 0 && rePassVal.length > 0) {
+                if (passVal === rePassVal) {
+                    helpText.text('Passwords match.').removeClass('text-red-600').addClass('text-green-600');
+                    submitBtn.prop('disabled', false);
+                } else {
+                    helpText.text('Passwords do not match.').removeClass('text-green-600').addClass('text-red-600');
+                    submitBtn.prop('disabled', true);
+                }
+            } else {
+                helpText.text('');
+                submitBtn.prop('disabled', true);
+            }
         }
-        else{
-            $("button").attr("disabled", "");
-            $("#inputRePassword").css({'box-shadow': '0 0 0 0.2rem rgb(255 0 0 / 40%) '});
-        }
+
+        password.on('keyup', validatePasswords);
+        rePassword.on('keyup', validatePasswords);
     });
 </script>
 {% endblock %}

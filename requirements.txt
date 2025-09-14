@@ -1,0 +1,6 @@
+flask
+mysql-connector-python
+cryptography
+werkzeug
+pyotp
+qrcode[pil]

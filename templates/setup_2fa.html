@@ -1,0 +1,34 @@
+{% extends 'layout.html' %}
+{% block title %}Set Up 2FA{% endblock %}
+
+{% block main_content %}
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg text-center">
+    <h2 class="text-2xl font-bold text-center text-gray-800 mb-4">Set Up Two-Factor Authentication (2FA)</h2>
+    <p class="text-gray-600 mb-6">Scan the QR code with your authenticator app (like Google Authenticator) or enter the key manually.</p>
+
+    <div class="flex justify-center mb-6">
+        <img src="data:image/png;base64,{{ qr_code_image }}" alt="2FA QR Code">
+    </div>
+
+    <div class="mb-6">
+        <p class="text-gray-600">Or enter this key manually:</p>
+        <p class="text-lg font-mono bg-gray-100 p-2 rounded-md inline-block">{{ secret_key }}</p>
+    </div>
+
+    <hr class="my-6">
+
+    <form action="{{ url_for('setup_2fa') }}" method="POST">
+        <h3 class="text-lg font-semibold text-gray-800 mb-2">Verify and Enable</h3>
+        <p class="text-gray-600 mb-4">Enter the 6-digit code from your authenticator app to complete the setup.</p>
+        <div class="flex justify-center">
+            <input type="text" name="totp_code" required maxlength="6" placeholder="123456"
+                   class="w-48 text-center text-2xl font-mono px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+        </div>
+        <div class="mt-6">
+            <button type="submit" class="w-full md:w-auto inline-flex justify-center py-3 px-6 border border-transparent rounded-md shadow-sm text-lg font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Verify & Enable 2FA
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

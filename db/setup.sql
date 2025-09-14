@@ -1,0 +1,38 @@
+CREATE DATABASE IF NOT EXISTS pass_locker;
+
+USE pass_locker;
+
+CREATE TABLE IF NOT EXISTS user_details (
+    u_id INT AUTO_INCREMENT PRIMARY KEY,
+    email_id VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    otp_secret TEXT NULL,
+    otp_salt TEXT NULL,
+    otp_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS ac_dtl_fernet (
+    sno INT AUTO_INCREMENT PRIMARY KEY,
+    uid INT NOT NULL,
+    site VARCHAR(255) NOT NULL,
+    username VARCHAR(255) NOT NULL,
+    password BLOB NOT NULL,
+    pass_key BLOB NOT NULL,
+    description VARCHAR(255) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (uid) REFERENCES user_details(u_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS tags (
+    tag_id INT AUTO_INCREMENT PRIMARY KEY,
+    tag_name VARCHAR(50) UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS credential_tags (
+    sno INT NOT NULL,
+    tag_id INT NOT NULL,
+    PRIMARY KEY (sno, tag_id),
+    FOREIGN KEY (sno) REFERENCES ac_dtl_fernet(sno) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags(tag_id) ON DELETE CASCADE
+);

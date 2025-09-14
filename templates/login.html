@@ -1,39 +1,57 @@
 {% extends 'layout.html'%}
-{% block title %}Register/Login{% endblock %}
-{% block head %}
-    {{ super() }}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/register.css') }}">
-    <style>
-        body{
-            background: '#ada996';
-            background: linear-gradient(to right, #ada996, #f2f2f2, #dbdbdb, #eaeaea);
-        }
-    </style>
-{% endblock %}
+{% block title %}Login{% endblock %}
 
 {% block navigation %}{% endblock %}
+{% block footer %}{% endblock %}
+
 {% block main_content %}
-<body class="text-center">
-    <form class="form-signin" action="{{url_for('login')}}" method="POST">
-        <a href="{{url_for('index')}}"><img class="mb-4" src="{{ url_for('static', filename='images/logo.png') }}" alt="" width="100" style="filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));"></a>
-        <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-        {% if message %}
-            <div class="alert alert-danger" role="alert">
-                {{message}}
-            </div>
-        {% endif %}
-        <label for="inputEmail" class="sr-only">Email address</label>
-        <input type="email" id="inputEmail" name="email" class="form-control" placeholder="Email address" required autofocus>
-        <label for="inputPassword" class="sr-only">Password</label>
-        <input type="password" id="inputPassword" name="password" class="form-control" placeholder="Password" required>
-        <div class="checkbox mb-3">
-            <label>
-                <input type="checkbox" value="remember-me"> Remember me
-            </label>
+<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div>
+            <a href="{{url_for('index')}}">
+                <img class="mx-auto h-24 w-auto" src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" style="filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.3));">
+            </a>
+            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+                Sign in to your account
+            </h2>
         </div>
-        <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button><br>
-        <span>New to this site? <a href="{{url_for('register')}}">Create an account</a></span>
-        <p class="mt-5 mb-3 text-muted">&copy; 2021-2022</p>
-    </form>
-</body>
+        <form class="mt-8 space-y-6" action="{{url_for('login')}}" method="POST">
+            <div class="rounded-md shadow-sm -space-y-px">
+                <div>
+                    <label for="inputEmail" class="sr-only">Email address</label>
+                    <input id="inputEmail" name="email" type="email" autocomplete="email" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Email address">
+                </div>
+                <div>
+                    <label for="inputPassword" class="sr-only">Password</label>
+                    <input id="inputPassword" name="password" type="password" autocomplete="current-password" required class="appearance-none rounded-none relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm" placeholder="Password">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                    <label for="remember-me" class="ml-2 block text-sm text-gray-900">
+                        Remember me
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <button type="submit" class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Sign in
+                </button>
+            </div>
+        </form>
+        <div class="text-sm text-center">
+            <p class="text-gray-600">New to this site? 
+                <a href="{{url_for('register')}}" class="font-medium text-indigo-600 hover:text-indigo-500">
+                    Create an account
+                </a>
+            </p>
+        </div>
+        <p class="mt-8 text-center text-sm text-gray-500">
+            &copy; 2021-2022
+        </p>
+    </div>
+</div>
 {% endblock%}
