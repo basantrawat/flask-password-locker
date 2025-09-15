@@ -2,20 +2,20 @@
 {% block title %}Set Up 2FA{% endblock %}
 
 {% block main_content %}
-<div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg text-center">
-    <h2 class="text-2xl font-bold text-center text-gray-800 mb-4">Set Up Two-Factor Authentication (2FA)</h2>
-    <p class="text-gray-600 mb-6">Scan the QR code with your authenticator app (like Google Authenticator) or enter the key manually.</p>
+<div class="max-w-2xl text-sm mx-auto bg-white p-8 rounded-lg shadow-lg text-center">
+    <h2 class="text-xl font-bold text-center text-gray-800 mb-4">Set Up Two-Factor Authentication (2FA)</h2>
+    <p class="text-gray-600">Scan the QR code with your authenticator app (like Google Authenticator) or enter the key manually.</p>
 
-    <div class="flex justify-center mb-6">
-        <img src="data:image/png;base64,{{ qr_code_image }}" alt="2FA QR Code">
+    <div class="flex justify-center">
+        <img src="data:image/png;base64,{{ qr_code_image }}" alt="2FA QR Code" width="40%">
     </div>
 
-    <div class="mb-6">
+    <div>
         <p class="text-gray-600">Or enter this key manually:</p>
-        <p class="text-lg font-mono bg-gray-100 p-2 rounded-md inline-block">{{ secret_key }}</p>
+        <p class="text-md font-mono bg-gray-100 p-2 rounded-md inline-block">{{ secret_key }}</p>
     </div>
 
-    <hr class="my-6">
+    <hr class="my-2">
 
     <form action="{{ url_for('setup_2fa') }}" method="POST">
         <h3 class="text-lg font-semibold text-gray-800 mb-2">Verify and Enable</h3>
