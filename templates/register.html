@@ -5,11 +5,11 @@
 {% block footer %}{% endblock %}
 
 {% block main_content %}
-<div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
+<div class="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full bg-white p-8 md:p-10 rounded-xl shadow-2xl space-y-8 border border-gray-200">
         <div>
             <a href="{{url_for('index')}}">
-                <img class="mx-auto h-24 w-auto" src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" style="filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.3));">
+                <img class="mx-auto h-20 w-auto" src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo">
             </a>
             <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
                 Create a new account
@@ -45,9 +45,6 @@
                 </a>
             </p>
         </div>
-        <p class="mt-8 text-center text-sm text-gray-500">
-            &copy; 2021-2022
-        </p>
     </div>
 </div>
 {% endblock%}

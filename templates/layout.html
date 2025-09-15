@@ -16,28 +16,32 @@
 
   <link rel="shortcut icon" href="{{url_for('static', filename= 'images/favicon.ico')}}" type="image/x-icon">
   <title>Password Locker - {% block title %}{% endblock %}</title>
+  <style>
+    /* For mobile menu slide-in animation */
+    #mobile-menu-drawer.translate-x-full {
+      transform: translateX(100%);
+    }
+  </style>
   {% endblock %}
 </head>
 
-<body class="bg-gray-100 text-gray-800 font-sans">
+<body class="bg-gray-100 text-gray-800 font-sans flex flex-col min-h-screen">
   {% block navigation %}
-  <nav class="bg-gray-800 shadow-lg">
+  <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-20">
     <div class="max-w-7xl mx-auto px-4">
       <div class="flex justify-between h-16">
         <div class="flex items-center">
-          <a class="flex items-center text-white" href="{{ url_for('index') }}">
-            <img src="{{ url_for('static', filename='images/logo-sm.png') }}" alt="logo" width="40" height="40"
+          <a class="flex items-center text-gray-800" href="{{ url_for('index') }}">
+            <img src="{{ url_for('static', filename='images/logo-sm.png') }}" alt="logo" width="35" height="35"
               class="mr-2">
             <span class="font-bold text-xl">Password Locker</span>
           </a>
           <div class="hidden md:flex items-baseline ml-10 space-x-4">
             {% if session['username'] %}
             <a href="{{ url_for('add_details') }}"
-              class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Add
-              Credential</a>
+              class="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Add Credential</a>
             <a href="{{ url_for('get_details') }}"
-              class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">View
-              Credentials</a>
+              class="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">View Credentials</a>
             {% endif %}
           </div>
         </div>
@@ -45,75 +49,85 @@
           {% if session['username'] %}
           <div class="relative">
             <button id="user-menu-button"
-              class="flex items-center text-gray-300 hover:text-white focus:outline-none">
-              <i class="fas fa-user mr-2"></i>
+              class="flex items-center text-gray-500 hover:text-indigo-600 focus:outline-none">
+              <i class="fas fa-user-circle mr-2 text-xl"></i>
               <span>{{session['username']}}</span>
               <i class="fas fa-caret-down ml-2"></i>
             </button>
             <div id="user-menu"
-              class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 hidden">
+              class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 hidden z-10">
               <a href="{{url_for('profile')}}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-              <a href="{{url_for('logout')}}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
+              <div class="border-t border-gray-100 my-1"></div>
+              <a href="{{url_for('logout')}}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-semibold">Logout</a>
             </div>
           </div>
           {% else %}
           <a href="{{ url_for('login') }}"
-            class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Login</a>
+            class="text-gray-500 hover:text-indigo-600 px-3 py-2 rounded-md text-sm font-medium">Login</a>
           <a href="{{ url_for('register') }}"
-            class="bg-indigo-600 text-white hover:bg-indigo-500 px-3 py-2 rounded-md text-sm font-medium">Register</a>
+            class="bg-indigo-600 text-white hover:bg-indigo-700 px-3 py-2 rounded-md text-sm font-medium">Register</a>
           {% endif %}
         </div>
+        <!-- Mobile Menu Button -->
         <div class="md:hidden flex items-center">
-          <button id="mobile-menu-button" class="text-gray-300 hover:text-white focus:outline-none">
-            <i class="fas fa-bars text-xl"></i>
+          <button id="mobile-menu-button" class="text-gray-500 hover:text-indigo-600 focus:outline-none z-30">
+            <i id="hamburger-icon" class="fas fa-bars text-xl"></i>
+            <i id="close-icon" class="fas fa-times text-xl hidden"></i>
           </button>
         </div>
-      </div>
-    </div>
-    <!-- Mobile menu -->
-    <div id="mobile-menu" class="md:hidden hidden">
-      <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-        {% if session['username'] %}
-        <a href="{{ url_for('add_details') }}"
-          class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Add
-          Credential</a>
-        <a href="{{ url_for('get_details') }}"
-          class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">View
-          Credentials</a>
-        <div class="border-t border-gray-700 my-2"></div>
-        <div class="px-3 py-2">
-            <span class="text-gray-300 font-medium flex items-center"><i class="fas fa-user mr-2"></i>{{session['username']}}</span>
-        </div>
-        <a href="{{url_for('logout')}}"
-          class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Logout</a>
-        {% else %}
-        <a href="{{ url_for('login') }}"
-          class="text-gray-300 hover:bg-gray-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Login</a>
-        <a href="{{ url_for('register') }}"
-          class="bg-indigo-600 text-white hover:bg-indigo-500 block px-3 py-2 rounded-md text-base font-medium">Register</a>
-        {% endif %}
       </div>
     </div>
   </nav>
   {% endblock %}
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <!-- Mobile Menu Backdrop -->
+  <div id="mobile-menu-backdrop" class="hidden fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-20"></div>
+
+  <!-- Mobile Menu Content -->
+  {% if session['username'] %}
+  <!-- Logged-in: Side Drawer -->
+  <div id="mobile-menu-drawer" class="fixed top-0 right-0 h-full w-64 bg-white shadow-lg z-30 transform translate-x-full transition-transform duration-300 ease-in-out">
+    <div class="p-5 space-y-2">
+        <a href="{{ url_for('add_details') }}" class="text-gray-700 hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium">Add Credential</a>
+        <a href="{{ url_for('get_details') }}" class="text-gray-700 hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium">View Credentials</a>
+        <div class="border-t border-gray-200 my-2"></div>
+        <a href="{{url_for('profile')}}" class="text-gray-700 hover:bg-gray-50 block px-3 py-2 rounded-md text-base font-medium">Profile</a>
+        <div class="border-t border-gray-200 my-2"></div>
+        <a href="{{url_for('logout')}}" class="text-red-600 bg-red-50 hover:bg-red-100 block px-3 py-2 rounded-md text-base font-medium">Logout</a>
+    </div>
+  </div>
+  {% else %}
+  <!-- Logged-out: Centered Modal -->
+  <div id="mobile-menu-modal" class="hidden fixed inset-0 z-30 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-xs text-center relative">
+        <button class="close-mobile-menu absolute top-0 right-0 mt-4 mr-4 text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times text-2xl"></i>
+        </button>
+        <div class="space-y-4 mt-6">
+            <a href="{{ url_for('login') }}" class="block w-full bg-gray-100 text-gray-700 hover:bg-gray-200 px-4 py-3 rounded-md text-base font-medium">Login</a>
+            <a href="{{ url_for('register') }}" class="block w-full bg-indigo-600 text-white hover:bg-indigo-700 px-4 py-3 rounded-md text-base font-medium">Register</a>
+        </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-    <div id="flash-messages" class="space-y-2">
+    <div id="flash-messages" class="space-y-2 mb-4">
       {% for category, message in messages %}
       {% set bg_color = 'bg-blue-100 border-blue-500 text-blue-700' %}
       {% if category == 'success' %}{% set bg_color = 'bg-green-100 border-green-500 text-green-700' %}{% endif %}
       {% if category == 'danger' %}{% set bg_color = 'bg-red-100 border-red-500 text-red-700' %}{% endif %}
       {% if category == 'warning' %}{% set bg_color = 'bg-yellow-100 border-yellow-500 text-yellow-700' %}{% endif %}
-      <div class="flash-message border-l-4 p-4 {{ bg_color }}" role="alert">
+      <div class="flash-message border-l-4 p-4 {{ bg_color }} rounded-r-md" role="alert">
         <div class="flex">
           <div class="py-1"><i class="fas fa-info-circle mr-3"></i></div>
           <div class="flex-grow">
             <p class="font-bold">{{ category.title() }}</p>
             <p class="text-sm">{{ message }}</p>
           </div>
-          <button type="button" class="ml-4 close-flash">&times;</button>
+          <button type="button" class="ml-4 close-flash font-bold text-xl">&times;</button>
         </div>
       </div>
       {% endfor %}
@@ -124,11 +138,9 @@
   </main>
 
   {% block footer %}
-  <footer class="bg-white shadow-inner mt-auto py-4">
+  <footer class="bg-white mt-auto py-4 border-t border-gray-200">
     <div class="max-w-7xl mx-auto px-4 text-center">
-      <span class="text-gray-500">All Copyright Reserved to &copy; <a
-          href="https://linkedin.com/in/basantsinghrawat/" class="text-indigo-600 hover:underline">Basant S.
-          Rawat</a></span>
+        <p class="text-gray-500 text-sm">&copy; <span id="footer-year"></span> Password Locker. All Rights Reserved.</p>
     </div>
   </footer>
   {% endblock %}
@@ -136,33 +148,77 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"
     integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
   
-  <!-- zxcvbn library for password strength -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js" integrity="sha512-ThM/xPinterk7quBCt+bE/h/u1bcSud/imgKyeu/z68+KzV3p/95JmK9iKv5qZk2p/Cbn3+u/sr5p1/pY3w/A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="{{ url_for('static', filename='js/zxcvbn.js') }}"></script>
 
   <script>
     $(document).ready(function() {
-        // Navbar toggles
-        $('#mobile-menu-button').click(function() {
-            $('#mobile-menu').toggleClass('hidden');
-        });
-
+        // --- Desktop User Menu --- //
         $('#user-menu-button').click(function() {
             $('#user-menu').toggleClass('hidden');
         });
 
-        // Close dropdown when clicking outside
         $(document).click(function(event) {
             if (!$(event.target).closest('#user-menu-button, #user-menu').length) {
                 $('#user-menu').addClass('hidden');
             }
         });
 
-        // Flash message dismiss
-        $('.close-flash').click(function() {
+        // --- Flash Messages --- //
+        $(document).on('click', '.close-flash', function() {
             $(this).closest('.flash-message').fadeOut('fast');
         });
 
-        // --- START: Auto Logout --- //
+        setTimeout(function() {
+            $('.flash-message').fadeOut('slow');
+        }, 5000);
+
+        // --- Mobile Menu Logic --- //
+        const $mobileMenuBackdrop = $('#mobile-menu-backdrop');
+        const $hamburgerIcon = $('#hamburger-icon');
+        const $closeIcon = $('#close-icon');
+        const $body = $('body');
+        
+        const $mobileMenu = $('#mobile-menu-drawer').length ? $('#mobile-menu-drawer') : $('#mobile-menu-modal');
+        const isDrawer = $('#mobile-menu-drawer').length > 0;
+
+        const openMenu = () => {
+            $mobileMenuBackdrop.removeClass('hidden');
+            $hamburgerIcon.addClass('hidden');
+            $closeIcon.removeClass('hidden');
+            $body.addClass('overflow-hidden');
+            if (isDrawer) {
+                $mobileMenu.removeClass('translate-x-full');
+            } else {
+                $mobileMenu.removeClass('hidden');
+            }
+        };
+
+        const closeMenu = () => {
+            $mobileMenuBackdrop.addClass('hidden');
+            $hamburgerIcon.removeClass('hidden');
+            $closeIcon.addClass('hidden');
+            $body.removeClass('overflow-hidden');
+            if (isDrawer) {
+                $mobileMenu.addClass('translate-x-full');
+            } else {
+                $mobileMenu.addClass('hidden');
+            }
+        };
+
+        $('#mobile-menu-button').click(function(e) {
+            e.stopPropagation();
+            if ($mobileMenuBackdrop.hasClass('hidden')) {
+                openMenu();
+            } else {
+                closeMenu();
+            }
+        });
+
+        // Close menu when clicking on backdrop or a dedicated close button
+        $mobileMenuBackdrop.click(closeMenu);
+        $(document).on('click', '.close-mobile-menu', closeMenu);
+
+        // --- Auto Logout --- //
         {% if session['username'] %}
         let inactivityTimer;
         const logoutUser = () => {
@@ -175,7 +231,9 @@
         $(document).on('mousemove keypress click', resetTimer);
         resetTimer(); // Initial setup
         {% endif %}
-        // --- END: Auto Logout --- //
+
+        // --- Dynamic Footer Year --- //
+        $('#footer-year').text(new Date().getFullYear());
     });
   </script>
 

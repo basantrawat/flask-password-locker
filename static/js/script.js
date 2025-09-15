@@ -104,37 +104,68 @@ $(document).ready(function() {
     // --- END: Advanced Password Generator --- //
 
 
-    // Password Visibility Toggle
-    $('.toggle-password').click(function(){
-        let input = $(this).prev('.password-field');
-        let icon = $(this).find('i');
-        if (input.attr('type') == 'password'){
-            input.attr('type', 'text');
-            icon.removeClass('fa-eye').addClass('fa-eye-slash');
-        } else {
-            input.attr('type', 'password');
-            icon.removeClass('fa-eye-slash').addClass('fa-eye');
-        }
-    });
+    // --- START: Description Character Counter --- //
+    const updateDescriptionCount = () => {
+        const descriptionField = $('#description');
+        if (descriptionField.length === 0) return;
 
-    // Copy to Clipboard for password list
-    $('.copy-password').click(function(){
-        let input = $(this).prev().prev('.password-field');
-        let originalType = input.attr('type');
-        if (originalType === 'password') {
-            input.attr('type', 'text');
+        const maxLength = descriptionField.attr('maxlength');
+        const currentLength = descriptionField.val().length;
+        const remaining = maxLength - currentLength;
+        const counter = $('#description-char-count');
+
+        counter.text(remaining + ' characters remaining');
+        counter.removeClass('text-gray-500 text-orange-500 text-red-600');
+
+        if (remaining < 0) {
+            counter.addClass('text-red-600');
+            counter.text('Character limit exceeded by ' + Math.abs(remaining));
+        } else if (remaining < 20) {
+            counter.addClass('text-orange-500');
+        } else {
+            counter.addClass('text-gray-500');
         }
-        
-        navigator.clipboard.writeText(input.val()).then(() => {
-            if (originalType === 'password') {
-                input.attr('type', 'password');
-            }
-            // Visual feedback
-            let icon = $(this).find('i');
-            icon.removeClass('fa-copy').addClass('fa-check');
-            setTimeout(function() {
-                icon.removeClass('fa-check').addClass('fa-copy');
-            }, 1500);
-        });
+    };
+
+    $(document).on('input', '#description', updateDescriptionCount);
+    // Trigger on page load for edit page
+    updateDescriptionCount();
+    // --- END: Description Character Counter --- //
+
+
+    // --- START: Event Delegation for Dynamic Content --- //
+// Use event delegation for password toggling and copying to work on list/grid view
+$(document).on('click', '.toggle-password', function(){
+    let input = $(this).prev('.password-field');
+    let icon = $(this).find('i');
+    if (input.attr('type') == 'password'){
+        input.attr('type', 'text');
+        icon.removeClass('fa-eye').addClass('fa-eye-slash');
+    } else {
+        input.attr('type', 'password');
+        icon.removeClass('fa-eye-slash').addClass('fa-eye');
+    }
+});
+
+$(document).on('click', '.copy-password', function(){
+    let input = $(this).prev().prev('.password-field');
+    let originalType = input.attr('type');
+    if (originalType === 'password') {
+        input.attr('type', 'text');
+    }
+    
+    navigator.clipboard.writeText(input.val()).then(() => {
+        if (originalType === 'password') {
+            input.attr('type', 'password');
+        }
+        // Visual feedback
+        let icon = $(this).find('i');
+        let originalIcon = icon.attr('class');
+        icon.removeClass('fa-copy').addClass('fa-check text-green-500');
+        setTimeout(function() {
+            icon.attr('class', originalIcon).removeClass('text-green-500');
+        }, 1500);
     });
+});
+// --- END: Event Delegation --- //
 });

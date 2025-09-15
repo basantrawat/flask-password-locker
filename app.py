@@ -13,6 +13,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
 from datetime import datetime, timedelta
+from zxcvbn import zxcvbn
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'default_secret_key')
@@ -133,7 +134,7 @@ def decrypt_pass(salt, encrypted_password):
         return decrypted_pass.decode('utf-8')
     except Exception as e:
         print(f"Decryption failed: {e}")
-        return "[DECRYPTION FAILED]"
+        return "[DECRYPTION FAILED]" 
 
 # --- Tagging Helper Functions ---
 def get_tag_id(tag_name):
@@ -198,8 +199,24 @@ def get_details():
 
     search_query = request.args.get('search', '')
     tag_filter = request.args.get('tag', '')
+    view_mode = request.args.get('view', 'grid') # grid or list
 
-    base_query = """SELECT ac.*, GROUP_CONCAT(t.tag_name) AS tags FROM ac_dtl_fernet ac LEFT JOIN credential_tags ct ON ac.sno = ct.sno LEFT JOIN tags t ON ct.tag_id = t.tag_id WHERE ac.uid = %s """
+    # Fetch all unique tags for the current user for the filter dropdown
+    tags_query = '''
+        SELECT DISTINCT t.tag_name 
+        FROM tags t
+        JOIN credential_tags ct ON t.tag_id = ct.tag_id
+        JOIN ac_dtl_fernet ac ON ct.sno = ac.sno
+        WHERE ac.uid = %s
+        ORDER BY t.tag_name
+    '''
+    all_tags = [row['tag_name'] for row in query_db(tags_query, (user_id,))]
+
+    base_query = """SELECT ac.*, GROUP_CONCAT(DISTINCT t.tag_name ORDER BY t.tag_name) AS tags 
+                  FROM ac_dtl_fernet ac 
+                  LEFT JOIN credential_tags ct ON ac.sno = ct.sno 
+                  LEFT JOIN tags t ON ct.tag_id = t.tag_id 
+                  WHERE ac.uid = %s """
     query_args = [user_id]
 
     if search_query:
@@ -207,7 +224,8 @@ def get_details():
         query_args.append(f'%{search_query}%')
     
     if tag_filter:
-        base_query += " AND t.tag_name = %s "
+        # Using a subquery to ensure we get credentials that HAVE the tag, even if they have others
+        base_query += " AND EXISTS (SELECT 1 FROM credential_tags ct2 JOIN tags t2 ON ct2.tag_id = t2.tag_id WHERE ct2.sno = ac.sno AND t2.tag_name = %s) "
         query_args.append(tag_filter)
 
     base_query += " GROUP BY ac.sno ORDER BY ac.site"
@@ -220,12 +238,18 @@ def get_details():
             decrypted_post = post.copy()
             decrypted_post['password'] = decrypt_pass(post['pass_key'], post['password'])
             if decrypted_post['tags']:
-                decrypted_post['tags'] = decrypted_post['tags'].split(',')
+                decrypted_post['tags'] = sorted(decrypted_post['tags'].split(','))
             else:
                 decrypted_post['tags'] = []
             decrypted_details.append(decrypted_post)
             
-    return render_template('get_details.html', posts=decrypted_details, search_query=search_query, tag_filter=tag_filter)
+    return render_template('get_details.html', 
+                           posts=decrypted_details, 
+                           search_query=search_query, 
+                           all_tags=all_tags, 
+                           tag_filter=tag_filter,
+                           view_mode=view_mode)
+
 
 @app.route('/edit_details/<int:sno>', methods=['GET', 'POST'])
 def edit_details(sno):
@@ -351,7 +375,8 @@ def login_2fa():
     if request.method == 'POST':
         totp_code = request.form['totp_code']
         
-        decrypted_otp_secret = decrypt_pass(user['otp_salt'], user['otp_secret'])
+        salt_bytes = bytes.fromhex(user['otp_salt'])
+        decrypted_otp_secret = decrypt_pass(salt_bytes, user['otp_secret'])
         
         if decrypted_otp_secret == "[DECRYPTION FAILED]":
             flash('Error decrypting 2FA secret. Please contact support.', 'danger')
@@ -359,7 +384,7 @@ def login_2fa():
             return redirect(url_for('login'))
 
         totp = pyotp.TOTP(decrypted_otp_secret)
-        if totp.verify(totp_code):
+        if totp.verify(totp_code, valid_window=1):
             session.pop('2fa_pending_user_id', None)
             session['username'] = user['email_id']
             flash('Logged in successfully!', 'success')
@@ -412,9 +437,10 @@ def setup_2fa():
             # Encrypt and save the secret
             otp_salt = os.urandom(16) # Generate a new salt for the OTP secret
             encrypted_otp_secret = encrypt_pass(otp_salt, temp_secret)
+            otp_salt_hex = otp_salt.hex()
 
             update_query = "UPDATE user_details SET otp_secret = %s, otp_salt = %s, otp_enabled = TRUE WHERE u_id = %s"
-            if update_db(update_query, (encrypted_otp_secret, otp_salt, user_id)):
+            if update_db(update_query, (encrypted_otp_secret, otp_salt_hex, user_id)):
                 session.pop('2fa_temp_secret', None)
                 flash('2FA has been successfully enabled!', 'success')
                 return redirect(url_for('profile'))
@@ -463,7 +489,8 @@ def disable_2fa():
         return redirect(url_for('profile'))
 
     # Verify TOTP code
-    decrypted_otp_secret = decrypt_pass(user['otp_salt'], user['otp_secret'])
+    salt_bytes = bytes.fromhex(user['otp_salt'])
+    decrypted_otp_secret = decrypt_pass(salt_bytes, user['otp_secret'])
     if decrypted_otp_secret == "[DECRYPTION FAILED]":
         flash('Error decrypting 2FA secret. Please contact support.', 'danger')
         return redirect(url_for('profile'))
@@ -601,9 +628,9 @@ def password_audit():
         # Password Strength Check
         # zxcvbn scores: 0=terrible, 1=weak, 2=fair, 3=good, 4=strong
         strength_result = zxcvbn(decrypted_password)
-        cred['strength_score'] = strength_result.score
-        cred['strength_feedback'] = strength_result.feedback.warning or ""
-        if strength_result.score < 2: # Weak or terrible
+        cred['strength_score'] = strength_result['score']
+        cred['strength_feedback'] = strength_result['feedback'].get('warning', '') or ""
+        if strength_result['score'] < 2: # Weak or terrible
             audit_results['weak_passwords'].append(cred)
 
         # Reused Password Check
