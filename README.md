@@ -20,25 +20,25 @@ Password Locker is a Flask-based web application designed to keep your account d
 
 ## Screenshots
 
-**Login Page**
+**Login Page:** *Login page for secure access*<br/>
 <img src="bin/screenshots/login_page.jpg" alt="Login Page" width="50%" />
-*Login page for secure access*
 
-**Dashboard**
+
+**Dashboard:** *Dashboard to view and manage passwords*<br/>
 <img src="bin/screenshots/dashboard.jpg" alt="Dashboard" width="50%" />
-*Dashboard to view and manage passwords*
 
-**Add New Details**
+
+**Add New Details:** *Form to add new account details*<br/>
 <img src="bin/screenshots/add_details.jpg" alt="Add New Details" width="50%" />
-*Form to add new account details*
 
-**Profile Settings**
+
+**Profile Settings:** *User profile settings page*<br/>
 <img src="bin/screenshots/profile-settings.jpg" alt="Profile Settings" width="50%" />
-*User profile settings page*
 
-**Password Audit**
+
+**Password Audit:** *Password audit and analysis dashboard*<br/>
 <img src="bin/screenshots/password-audit.jpg" alt="Password Audit" width="50%" />
-*Password audit and analysis dashboard*
+
 
 ---
 
